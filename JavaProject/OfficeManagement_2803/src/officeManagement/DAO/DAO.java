@@ -422,11 +422,14 @@ public class DAO {
 	            ps.setString(1, "%" + inputString + "%");
 	            ps.setString(2, "%" + inputString + "%");
 	            ps.setString(3, "%" + inputString + "%");
-	            ps.setString(5, "%" + inputString + "%");
+	            
 
 	            if (isNumeric) {
 	                ps.setDouble(4, prezzo);  
+	                ps.setString(5, "%" + inputString + "%");
 	            }
+	            else 
+	            	ps.setString(4, "%" + inputString + "%");
 
 	            ResultSet rs = ps.executeQuery();
 	            
@@ -445,6 +448,7 @@ public class DAO {
 	        return prodottiTrovati;
 	    } catch (SQLException e) {
 	        JOptionPane.showMessageDialog(null, "È stato riscontrato un problema nell'esecuzione del comando.");
+	        List<Prodotto> prodottiTrovati = new ArrayList<Prodotto>();
 	        return null;
 	    }
 	}

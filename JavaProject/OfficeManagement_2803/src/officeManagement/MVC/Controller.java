@@ -33,6 +33,7 @@ public class Controller {
 	private OrdineFornituraView ordineFornituraView;
 	private List<Ordine> ordiniDaCompl = new ArrayList<Ordine>();
 	private List<Prodotto> prodotti = new ArrayList<Prodotto>();
+	private List<Prodotto> prodottiRicerca = new ArrayList<Prodotto>();
 	
 	public Controller(Model model, View view, OrdiniView ordiniView, CompletaOrdineView completaOrdineView, 
 			AggiungiOrdineView aggiungiOrdineView, AggiungiProdottoView aggiungiProdottoView, ProdottoView prodottoView,
@@ -126,12 +127,12 @@ public class Controller {
 	
 	public String setTxtRiepilogoProdottiConRicerca(String inputString) throws SQLException {
 		String s = "";
-		List<Prodotto> prodottiRicerca = model.ricercaProdotti(inputString);
-		if (prodottiRicerca.size() == 0) 
+		this.prodottiRicerca = model.ricercaProdotti(inputString);
+		if (prodottiRicerca == null || prodottiRicerca.isEmpty() ) 
 			s += "Nessun prodotto trovato";
 		else {
 			s = s + "<html><p>&nbsp;&nbsp;&nbsp;PRODOTTI TROVATI: " + prodottiRicerca.size() + "</p>";
-			s += "<table cellpadding='10' cellspacing='25' ><tr color = 'red'><th>Id prodotto</th><th>Nome</th><th>Descrizione</th><th>Prezzo</th></tr>";
+			s += "<table cellpadding='10' cellspacing='25' ><tr color = 'red'><th>Id prodotto</th><th>Nome</th><th>Cliente</th><th>Descrizione</th><th>Prezzo</th></tr>";
 			for (Prodotto p: prodottiRicerca) {
 				s += p.toString();
 			}
@@ -148,7 +149,7 @@ public class Controller {
 			s += "Nessun prodotto trovato";
 		else {
 			s = s + "<html><p>&nbsp;&nbsp;&nbsp;PRODOTTI TROVATI: " + prodotti.size() + "</p>";
-			s += "<table cellpadding='10' cellspacing='25' ><tr color = 'red'><th>Id prodotto</th><th>Nome</th><th>Descrizione</th><th>Prezzo</th></tr>";
+			s += "<table cellpadding='10' cellspacing='25' ><tr color = 'red'><th>Id prodotto</th><th>Nome</th><th>Cliente</th><th>Descrizione</th><th>Prezzo</th></tr>";
 			for (String s1: prodotti) {
 				s += s1;
 			}
@@ -461,23 +462,69 @@ public class Controller {
 		return null;
 	}
 	
-	public List<String> ricercaProdottiFiltri(List<String> prodottiTrovati, String filtro) {
+	public List<String> ricercaProdottiFiltri(List<String> prodottiTrovati, String filtro, String tipologia) {
 		for (Prodotto p: prodotti) { 
-			if (p.getIdCliente().equals(filtro))
-				 if (!prodottiTrovati.contains(p.toString())) {
-		                prodottiTrovati.add(p.toString());
-		            }
+			if (tipologia.equals("Conto vendita")){
+				if (p.getIdCliente().equals(filtro) && p instanceof ProdottoContoVendita )
+					 if (!prodottiTrovati.contains(p.toString())) {
+			                prodottiTrovati.add(p.toString());
+			            }
+			}
+			else if (tipologia.equals("Conto lavoro")){
+				if (p.getIdCliente().equals(filtro) && p instanceof ProdottoContoLavoro)
+					 if (!prodottiTrovati.contains(p.toString())) {
+			                prodottiTrovati.add(p.toString());
+			            }
+			}
+			else {
+				if (p.getIdCliente().equals(filtro) )
+					 if (!prodottiTrovati.contains(p.toString())) {
+			                prodottiTrovati.add(p.toString());
+					 }
+			}
 		}
 		return prodottiTrovati;
 	}
 	
-	public List<String> ricercaProdottiFiltriP(List<String> prodottiTrovati, String filtro) {
+	public List<String> ricercaProdottiFiltriP(List<String> prodottiTrovati, String filtro, String tipologia) {
 		for (Prodotto p: prodotti) { 
-			if (p.getId().equals(filtro))
-				 if (!prodottiTrovati.contains(p.toString())) {
-		                prodottiTrovati.add(p.toString());
-		            }
-		}
+			if (tipologia.equals("Conto vendita")){
+				if (p.getId().equals(filtro) && p instanceof ProdottoContoVendita )
+					 if (!prodottiTrovati.contains(p.toString())) {
+			                prodottiTrovati.add(p.toString());
+			            }
+			}
+			else if (tipologia.equals("Conto lavoro")){
+				if (p.getId().equals(filtro) && p instanceof ProdottoContoLavoro)
+					 if (!prodottiTrovati.contains(p.toString())) {
+			                prodottiTrovati.add(p.toString());
+			            }
+			}
+			else {
+				if (p.getId().equals(filtro))
+					 if (!prodottiTrovati.contains(p.toString())) {
+			                prodottiTrovati.add(p.toString());
+			            }
+			}
+		}	
+		return prodottiTrovati;
+	}
+	
+	public List<String> ricercaProdottiFiltriT(List<String> prodottiTrovati, String tipologia) {
+		if (tipologia.equals("Conto vendita")) 
+			for (Prodotto p: prodotti)
+				if (p instanceof ProdottoContoVendita)
+					prodottiTrovati.add(p.toString());
+		
+		if (tipologia.equals("Conto lavoro"))
+			for (Prodotto p1: prodotti)
+				if (p1 instanceof ProdottoContoLavoro)
+					prodottiTrovati.add(p1.toString());
+	
+		if (!tipologia.equals("Conto lavoro") && !tipologia.equals("Conto vendita"))
+			for (Prodotto p2: prodotti) 
+				prodottiTrovati.add(p2.toString());
+		
 		return prodottiTrovati;
 	}
 	

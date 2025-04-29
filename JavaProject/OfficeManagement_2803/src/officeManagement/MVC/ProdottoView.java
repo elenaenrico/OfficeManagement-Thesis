@@ -1,12 +1,10 @@
 package officeManagement.MVC;
 import java.awt.BorderLayout;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.sql.SQLException;
@@ -37,10 +35,10 @@ public class ProdottoView extends JFrame{
 	private JLabel prodotti = new JLabel();
 	private JLabel prodottiRic = new JLabel();
 	private JLabel prodottiFil = new JLabel();
-	private JButton btnReset = new JButton("Azzera ricerca");
 	private boolean filtriVisibili = false;
 	private JPanel panelClienti = new JPanel();
 	private JPanel panelProdotti = new JPanel();
+	private JPanel panelTipologia = new JPanel();
 
 	public ProdottoView() {
 		try {
@@ -129,12 +127,14 @@ public class ProdottoView extends JFrame{
 
         	// 	Pannello per i filtri
         panelFiltri.setLayout(new BoxLayout(panelFiltri, BoxLayout.Y_AXIS));
+        panelFiltri.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         panelFiltri.setVisible(false);
+        JScrollPane scrollPanelFiltri = new JScrollPane(panelFiltri);
+        scrollPanelFiltri.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); 
         JPanel panelF = new JPanel();
         panelF.setLayout(new BoxLayout(panelF, BoxLayout.Y_AXIS));
         
-        JToggleButton jtbClienti = new JToggleButton("Clienti ⌄");
-        ingrandisciFont(jtbClienti);
+        JToggleButton jtbClienti = new JToggleButton("<html><font face = 'Segoe UI' size = 4>Clienti</font> <font face = 'Segoe UI' size = 2>▼</font></html>");
         jtbClienti.setFocusPainted(false);
         jtbClienti.setBorder(null); 
         jtbClienti.setBackground(this.getBackground());
@@ -149,15 +149,14 @@ public class ProdottoView extends JFrame{
             boolean aperto = jtbClienti.isSelected();
             panelClienti.setVisible(aperto);
             if (aperto == true)
-            	jtbClienti.setText("Categorie ⌃" );
+            	jtbClienti.setText("<html><font face = 'Segoe UI' size = 4>Clienti</font> <font face = 'Segoe UI' size = 2>▲</font></html>" );
             else
-            	jtbClienti.setText("Categorie ⌄");
+            	jtbClienti.setText("<html><font face = 'Segoe UI' size = 4>Clienti</font> <font face = 'Segoe UI' size = 2>▼</font></html>");
             panelClienti.revalidate();
             panelClienti.repaint();
         });
         
-        JToggleButton jtbProdotti = new JToggleButton("Prodotti ⌄");
-        ingrandisciFont(jtbProdotti);
+        JToggleButton jtbProdotti = new JToggleButton("<html><font face = 'Segoe UI' size = 4>Prodotti</font> <font face = 'Segoe UI' size = 2>▼</font></html>");
         jtbProdotti.setFocusPainted(false);
         jtbProdotti.setBorder(null); 
         jtbProdotti.setBackground(this.getBackground());
@@ -172,51 +171,120 @@ public class ProdottoView extends JFrame{
             boolean aperto = jtbProdotti.isSelected();
             panelProdotti.setVisible(aperto);
             if (aperto == true)
-            	jtbProdotti.setText("Prodotti ⌃" );
+            	jtbProdotti.setText("<html><font face = 'Segoe UI' size = 4>Prodotti</font> <font face = 'Segoe UI' size = 2>▲</font></html>" );
             else
-            	jtbProdotti.setText("Prodotti ⌄");
+            	jtbProdotti.setText("<html><font face = 'Segoe UI' size = 4>Prodotti</font> <font face = 'Segoe UI' size = 2>▼</font></html>");
             panelProdotti.revalidate();
             panelProdotti.repaint();
         });
         
+        JToggleButton jtbTipologia = new JToggleButton("<html><font face = 'Segoe UI' size = 4>Tipologia prodotti</font> <font face = 'Segoe UI' size = 2>▼</font></html>");
+        jtbTipologia.setFocusPainted(false);
+        jtbTipologia.setBorder(null);
+        jtbTipologia.setBackground(this.getBackground());
+        
+        panelTipologia.setLayout(new BoxLayout(panelTipologia, BoxLayout.Y_AXIS));
+        panelTipologia.setVisible(false);
+        caricaTipologie();
+        
+        panelF.add(jtbTipologia);
+        panelF.add(panelTipologia);
+        jtbTipologia.addActionListener(e -> {
+            boolean aperto = jtbTipologia.isSelected();
+            panelTipologia.setVisible(aperto);
+            if (aperto == true)
+            	jtbTipologia.setText("<html><font face = 'Segoe UI' size = 4>Tipologia prodotti</font> <font face = 'Segoe UI' size = 2>▲</font></html>" );
+            else
+            	jtbTipologia.setText("<html><font face = 'Segoe UI' size = 4>Tipologia prodotti</font> <font face = 'Segoe UI' size = 2>▼</font></html>");
+            panelTipologia.revalidate();
+            panelTipologia.repaint();
+        });
+        
+        JButton btnResetF = new JButton("Azzera filtri");
+        btnResetF.setVisible(false);
         JButton btnApplica = new JButton("Applica filtri");
         btnApplica.addActionListener(e -> {
         	List<String> prodottiFiltri = new ArrayList<String>();
+        	boolean almenoUnSelezionato = false;
+        	boolean cliProdSelezionato = false;
+        	String tipologiaSelezionata = "";
+        	for (Component c: panelTipologia.getComponents())
+        		if (c instanceof JCheckBox)
+        			if (((JCheckBox) c).isSelected()) {
+        				almenoUnSelezionato = true;
+        				tipologiaSelezionata += ((JCheckBox) c).getText();
+        			}
+        	       	
         	for (Component c: panelClienti.getComponents()) 
         		if (c instanceof JCheckBox) 
-        			if (((JCheckBox) c).isSelected())
-        				prodottiFiltri = controller.ricercaProdottiFiltri(prodottiFiltri, ((JCheckBox) c).getText());
+        			if (((JCheckBox) c).isSelected()) {
+        				almenoUnSelezionato = true;
+        				cliProdSelezionato = true;
+        				prodottiFiltri = controller.ricercaProdottiFiltri(prodottiFiltri, ((JCheckBox) c).getText(), tipologiaSelezionata);
+        			}
         	
         	for (Component c: panelProdotti.getComponents())
         		if (c instanceof JCheckBox)
-        			if (((JCheckBox) c).isSelected())
-        				prodottiFiltri = controller.ricercaProdottiFiltriP(prodottiFiltri, ((JCheckBox) c).getText());
+        			if (((JCheckBox) c).isSelected()) {
+        				almenoUnSelezionato = true;
+        				cliProdSelezionato = true;
+        				prodottiFiltri = controller.ricercaProdottiFiltriP(prodottiFiltri, ((JCheckBox) c).getText(), tipologiaSelezionata);
+        				}
         	
-        	prodotti.setVisible(false);
-        	prodottiRic.setVisible(false);
-        	prodottiFil.setText(controller.setTxtRiepilogoProdottiConFiltri(prodottiFiltri));
-        	prodottiFil.setVisible(true);
-        	panelTXT.add(prodottiFil);
-        	panelFiltri.add(btnReset);
-        	
-        	btnReset.addActionListener(e1 -> {
-				prodottiFil.setVisible(false);
-				prodotti.setVisible(true);
-				txtSearch.setText("");
-				panelSearch.remove(btnReset); 
-			    revalidate(); 
-			    repaint();
-			});
-			
-			revalidate();
-			repaint();
-        	
+        	if (!cliProdSelezionato ) {
+        		prodottiFiltri = controller.ricercaProdottiFiltriT(prodottiFiltri, tipologiaSelezionata);
+        	}
+        	if (almenoUnSelezionato == true) {
+	        	prodotti.setVisible(false);
+	        	prodottiRic.setVisible(false);
+	        	prodottiFil.setText(controller.setTxtRiepilogoProdottiConFiltri(prodottiFiltri));
+	        	prodottiFil.setVisible(true);
+	        	panelTXT.add(prodottiFil);
+	        	btnResetF.setVisible(true);
+				
+				revalidate();
+				repaint();
+        	}
         });
-      
+        
+        btnResetF.addActionListener(e1 -> {
+			prodottiFil.setVisible(false);
+			prodotti.setVisible(true);
+			for (Component c: panelProdotti.getComponents()) {
+				if (c instanceof JCheckBox) 
+					((JCheckBox) c).setSelected(false);
+				
+			}
+			
+			for (Component c: panelTipologia.getComponents()) 
+				if (c instanceof JCheckBox)
+					((JCheckBox) c).setSelected(false);
+			
+			for (Component c: panelClienti.getComponents()) {
+				if (c instanceof JCheckBox) 
+					((JCheckBox) c).setSelected(false);
+				
+			}
+			btnResetF.setVisible(false);
+			jtbClienti.setText("<html><font face = 'Segoe UI' size = 4>Clienti</font> <font face = 'Segoe UI' size = 2>▼</font></html>");
+			jtbClienti.setSelected(false);
+			jtbProdotti.setText("<html><font face = 'Segoe UI' size = 4>Prodotti</font> <font face = 'Segoe UI' size = 2>▼</font></html>");
+			jtbProdotti.setSelected(false);
+			jtbTipologia.setText("<html><font face = 'Segoe UI' size = 4>Tipologia prodotti</font> <font face = 'Segoe UI' size = 2>▼</font></html>");
+			jtbTipologia.setSelected(false);
+			panelClienti.setVisible(false);
+			panelProdotti.setVisible(false);
+			panelTipologia.setVisible(false);
+			
+		    panelFiltri.revalidate(); 
+		    panelFiltri.repaint();
+		});
+        
         panelFiltri.add(panelF);
         panelFiltri.add(btnApplica);
-        panelFiltri.setPreferredSize(new Dimension(500, 800)); 
-        panelFiltri.setMinimumSize(new Dimension(500, 800));
+        panelFiltri.add(btnResetF);
+        panelFiltri.setPreferredSize(new Dimension(300, 800)); 
+        panelFiltri.setMinimumSize(new Dimension(300, 800));
         
         panelAzioni.add(panelSearch, BorderLayout.WEST);
         panelAzioni.add(panelBtn, BorderLayout.EAST);
@@ -224,7 +292,8 @@ public class ProdottoView extends JFrame{
 	    JScrollPane scrollPane = new JScrollPane(panelTXT);
         add(scrollPane, BorderLayout.CENTER);
         add(panelFiltri, BorderLayout.WEST);
-
+        
+        JButton btnReset = new JButton("Azzera ricerca");
         btnSearch.addActionListener(e -> {
 			 String prodottoCercato = txtSearch.getText();
 			 prodotti.setVisible(false);
@@ -235,10 +304,6 @@ public class ProdottoView extends JFrame{
 				prodottiRic.setVisible(true);
 				
 				btnReset.addActionListener(e1 -> {
-					for (Component c: panelFiltri.getComponents()) {
-						if (c instanceof JCheckBox)
-							((JCheckBox) c).setSelected(false);
-					}
 					prodottiRic.setVisible(false);
 					prodotti.setVisible(true);
 					txtSearch.setText("");
@@ -280,6 +345,15 @@ public class ProdottoView extends JFrame{
 		}
 	}
 	
+	public void caricaTipologie() {
+		JCheckBox checkBoxL = new JCheckBox("Conto lavoro");
+		JCheckBox checkBoxV = new JCheckBox("Conto vendita");
+		ingrandisciFont(checkBoxV);
+		ingrandisciFont(checkBoxL);
+		panelTipologia.add(checkBoxV);
+		panelTipologia.add(checkBoxL);
+	}
+	
 	private void aggiornaDimensioniPannello() {
 		panelFiltri.revalidate(); // Ricalcola le dimensioni del pannello
 	    panelFiltri.repaint();    // Rende visibile il cambiamento
@@ -288,9 +362,8 @@ public class ProdottoView extends JFrame{
 	}
 	
 	private void ingrandisciFont(Component com) {
-		Font fontO = com.getFont();
-		Font fontIng = fontO.deriveFont(fontO.getStyle(), 16f); 
-		com.setFont(fontIng);
+		Font fontIng = new Font("Segoe UI", Font.PLAIN, 14);
+		com.setFont(fontIng);	
 	}
 	
 }
